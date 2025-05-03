@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
+	"rest-api/handlers"
 	"rest-api/middleware"
 
 	"github.com/go-chi/chi/v5"
@@ -14,7 +15,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Ошибка загрузки .env файла")
+		log.Fatal("Ошибка загрузки .env файла:", err)
 	}
 
 	expectedToken := os.Getenv("API_TOKEN")
@@ -22,12 +23,19 @@ func main() {
 		log.Fatal("API_TOKEN не задан")
 	}
 
+	db, err := sql.Open("sqlite", "./data.db")
+	if err != nil {
+		log.Fatal("Ошибка открытия базы данных:", err)
+	}
+	defer db.Close()
+
 	r := chi.NewRouter()
 
 	r.Route("/api", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware(expectedToken))
 
-		r.Get("/route1", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintln(w, "Access granted!") })
+		r.Get("/count", handlers.CountItemsHandler(db))
+		r.Get("/last_created_at", handlers.LastCreatedAtHandler(db))
 	})
 
 	http.ListenAndServe(":8080", r)
