@@ -76,3 +76,34 @@ func GetItemByDateHandler(db *sql.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(item)
 	}
 }
+
+func AddItemHandler(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var item Item
+		err := json.NewDecoder(r.Body).Decode(&item)
+		if err != nil {
+			http.Error(w, "Неверный JSON: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		query := `
+			INSERT INTO items (
+				indicator_id, indicator_value, country_id, country_value,
+				country_iso3_code, date, value, unit, obs_status, decimal
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`
+
+		_, err = db.Exec(query,
+			item.IndicatorId, item.IndicatorValue, item.CountryId, item.CountryValue,
+			item.CountryISO3Code, item.Date, item.Value, item.Unit, item.ObsStatus,
+			item.Decimal,
+		)
+		if err != nil {
+			http.Error(w, "Ошибка при добавлении записи: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Элемент добавлен"})
+	}
+}
