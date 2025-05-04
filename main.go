@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -38,5 +39,6 @@ func main() {
 		r.Get("/last_created_at", handlers.LastCreatedAtHandler(db))
 	})
 
+	fmt.Println("Сервер запущен на порту 8080")
 	http.ListenAndServe(":8080", r)
 }
