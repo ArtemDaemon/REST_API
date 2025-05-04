@@ -22,6 +22,15 @@ type Item struct {
 	CreatedAt       string `json:"created_at"`
 }
 
+// CountItemsHandler возвращает количество элементов в таблице items
+// @Summary Получить количество элементов
+// @Description Возвращает общее число записей в базе данных
+// @Tags items
+// @Produce json
+// @Success 200 {object} map[string]int
+// @Failure 500 {string} string "Ошибка при запросе количества"
+// @Security ApiKeyAuth
+// @Router /api/count [get]
 func CountItemsHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var count int
@@ -35,6 +44,15 @@ func CountItemsHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// LastCreatedAtHandler возвращает дату последнего добавления записи
+// @Summary Получить дату последнего элемента
+// @Description Возвращает максимальное значение поля created_at
+// @Tags items
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Failure 500 {string} string "Ошибка при получении даты"
+// @Security ApiKeyAuth
+// @Router /api/last_created_at [get]
 func LastCreatedAtHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var ts sql.NullString
@@ -50,6 +68,18 @@ func LastCreatedAtHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// GetItemByDateHandler получает элемент по дате
+// @Summary Получить элемент по дате
+// @Description Возвращает первую запись с указанной датой
+// @Tags items
+// @Produce json
+// @Param year query string true "Год (например, 2022)"
+// @Success 200 {object} handlers.Item
+// @Failure 400 {string} string "Параметр 'year' обязателен"
+// @Failure 404 {string} string "Элемент не найден"
+// @Failure 500 {string} string "Ошибка при запросе"
+// @Security ApiKeyAuth
+// @Router /api/get_item [get]
 func GetItemByDateHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		year := r.URL.Query().Get("year")
@@ -77,6 +107,18 @@ func GetItemByDateHandler(db *sql.DB) http.HandlerFunc {
 	}
 }
 
+// AddItemHandler добавляет новый элемент в базу данных
+// @Summary Добавить элемент
+// @Description Принимает JSON-структуру и добавляет её в базу
+// @Tags items
+// @Accept json
+// @Produce json
+// @Param item body handlers.Item true "Элемент данных"
+// @Success 201 {object} map[string]string
+// @Failure 400 {string} string "Неверный JSON"
+// @Failure 500 {string} string "Ошибка при добавлении записи"
+// @Security ApiKeyAuth
+// @Router /api/add_item [post]
 func AddItemHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var item Item

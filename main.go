@@ -11,8 +11,18 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+
+	_ "rest-api/docs" // автосгенерированная документация
+
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title Пример REST API
+// @version 1.0
+// @description Это REST API с авторизацией через Bearer-токен
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name Aithorization
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -31,6 +41,8 @@ func main() {
 	defer db.Close()
 
 	r := chi.NewRouter()
+
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	r.Route("/api", func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware(expectedToken))
