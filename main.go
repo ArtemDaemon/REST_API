@@ -37,6 +37,7 @@ func main() {
 
 		r.Get("/count", handlers.CountItemsHandler(db))
 		r.Get("/last_created_at", handlers.LastCreatedAtHandler(db))
+		r.Get("/get_item", handlers.GetItemByDateHandler(db))
 	})
 
 	fmt.Println("Сервер запущен на порту 8080")
